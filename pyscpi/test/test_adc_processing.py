@@ -3,6 +3,7 @@ import pytest
 from numpy.testing import assert_equal, assert_allclose
 import numpy as np
 
+@pytest.mark.remote
 def testTwosToInteger():
     """
     Check that this function converts a set of three bytes in twos complement to a signed integer. Checks
@@ -23,7 +24,7 @@ def testTwosToInteger():
     actualIntegers = twos_to_integer(testBytes)
     assert_allclose(desiredIntegers, actualIntegers, atol=1e-5)
 
-
+@pytest.mark.remote
 def testCountToVoltage():
     """
     Test converting a raw ADC count into a voltage
@@ -33,6 +34,7 @@ def testCountToVoltage():
     actualValue = count_to_voltage(actualCount, maxVoltage=5)
     assert_allclose(desiredValue, actualValue)
 
+@pytest.mark.remote
 def testTwosToVoltage():
     desiredVoltage = np.array([5.0])
     testBytes = np.array([127, 255, 255])

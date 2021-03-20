@@ -37,7 +37,7 @@ jobs:
 
     - name: Test with pytest, generate coverage report
       run: |
-        $CONDA/envs/anaconda-client-env/bin/pytest --cov=./pyscpi/source --cov-report xml
+        $CONDA/envs/anaconda-client-env/bin/pytest -m remote --cov=./pyscpi/source --cov-report xml
 
     - name: Lint with flake8
       run: |
@@ -80,7 +80,7 @@ jobs:
 
     - name: Run testPyPi test suite
       run: 
-        $CONDA/envs/anaconda-client-env/bin/pytest $CONDA/envs/anaconda-client-env/lib/python3.8/site-packages/pyscpi/
+        $CONDA/envs/anaconda-client-env/bin/pytest -m remote $CONDA/envs/anaconda-client-env/lib/python3.8/site-packages/pyscpi/
 
     - name: Deploy to PyPi
       uses: pypa/gh-action-pypi-publish@master
@@ -97,4 +97,4 @@ jobs:
 
     - name: Run PyPi test suite
       run: 
-        $CONDA/envs/anaconda-client-env/bin/pytest $CONDA/envs/anaconda-client-env/lib/python3.8/site-packages/pyscpi/
+        $CONDA/envs/anaconda-client-env/bin/pytest -m remote $CONDA/envs/anaconda-client-env/lib/python3.8/site-packages/pyscpi/
