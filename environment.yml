@@ -1,0 +1,26 @@
+name: anaconda-client-env
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - pip
+  - flake8
+  - coverage
+  - pytest
+  - pytest-cov
+  - coveralls
+  - matplotlib
+  - numpy
+  - pandas
+  - pip:
+    - sphinxcontrib-bibtex
+    - pint
+  - pyserial
+  - pyvisa
+  - scipy
+  - sphinx
+  - sphinx_rtd_theme
+  - sphinxcontrib-jsmath
+  - setuptools
+  - wheel
