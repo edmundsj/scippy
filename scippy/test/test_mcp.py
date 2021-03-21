@@ -1,4 +1,4 @@
-from pyscpi import MCP
+from scippy import MCP
 import numpy as np
 import pyvisa
 import serial

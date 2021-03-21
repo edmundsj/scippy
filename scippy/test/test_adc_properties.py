@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from pyscpi import MCP, twos_to_voltage
+from scippy import MCP, twos_to_voltage
 import matplotlib.pyplot as plt
 
 @pytest.fixture

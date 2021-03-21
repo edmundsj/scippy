@@ -1,4 +1,4 @@
-from SCPIDevice import SCPIDevice
+from scippy import SCPIDevice
 import numpy as np
 import pyvisa
 import pytest

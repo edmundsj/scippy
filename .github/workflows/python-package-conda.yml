@@ -37,7 +37,7 @@ jobs:
 
     - name: Test with pytest, generate coverage report
       run: |
-        $CONDA/envs/anaconda-client-env/bin/pytest -m remote --cov=./pyscpi/source --cov-report xml
+        $CONDA/envs/anaconda-client-env/bin/pytest -m remote --cov=./scippy/source --cov-report xml
 
     - name: Lint with flake8
       run: |
@@ -72,15 +72,15 @@ jobs:
 
     - name: Download and install from TestPyPi
       run:
-        $CONDA/envs/anaconda-client-env/bin/pip install --index-url https://test.pypi.org/simple --extra-index-url https://pypi.org/simple pyscpi;
+        $CONDA/envs/anaconda-client-env/bin/pip install --index-url https://test.pypi.org/simple --extra-index-url https://pypi.org/simple scippy;
 
-    - name: Show where pyscpi is located
+    - name: Show where scippy is located
       run:
-        $CONDA/envs/anaconda-client-env/bin/pip show pyscpi;
+        $CONDA/envs/anaconda-client-env/bin/pip show scippy;
 
     - name: Run testPyPi test suite
       run: 
-        $CONDA/envs/anaconda-client-env/bin/pytest -m remote $CONDA/envs/anaconda-client-env/lib/python3.8/site-packages/pyscpi/
+        $CONDA/envs/anaconda-client-env/bin/pytest -m remote $CONDA/envs/anaconda-client-env/lib/python3.8/site-packages/scippy/
 
     - name: Deploy to PyPi
       uses: pypa/gh-action-pypi-publish@master
@@ -92,9 +92,9 @@ jobs:
 
     - name: Download aand install from PyPi
       run: 
-        $CONDA/envs/anaconda-client-env/bin/pip uninstall -y pyscpi;
-        $CONDA/envs/anaconda-client-env/bin/pip install pyscpi;
+        $CONDA/envs/anaconda-client-env/bin/pip uninstall -y scippy;
+        $CONDA/envs/anaconda-client-env/bin/pip install scippy;
 
     - name: Run PyPi test suite
       run: 
-        $CONDA/envs/anaconda-client-env/bin/pytest -m remote $CONDA/envs/anaconda-client-env/lib/python3.8/site-packages/pyscpi/
+        $CONDA/envs/anaconda-client-env/bin/pytest -m remote $CONDA/envs/anaconda-client-env/lib/python3.8/site-packages/scippy/

@@ -2,11 +2,11 @@ import setuptools
 import os
 import glob
 
-example_data = glob.glob('pyscpi/examples/*')
-source_data = glob.glob('pyscpi/source/*')
-test_data = glob.glob('pyscpi/test/*')
+example_data = glob.glob('scippy/examples/*')
+source_data = glob.glob('scippy/source/*')
+test_data = glob.glob('scippy/test/*')
 total_data = example_data + source_data + test_data
-package_data = [x.replace('pyscpi/', '') for x in total_data]
+package_data = [x.replace('scippy/', '') for x in total_data]
 
 #raise ValueError(f'PACKAGE DATA: {package_data}')
 
@@ -14,18 +14,18 @@ with open("README.md", "r") as fh:
 	long_description = fh.read()
 
 	setuptools.setup(
-		name="pyscpi",
+		name="scippy",
 		version="0.1." + str(os.environ['GITHUB_RUN_NUMBER']),
 		author="Jordan Edmunds",
 		author_email="edmundsj@uci.edu",
 		description="Python package for communication with SCPI-based instruments",
 		long_description=long_description,
 		long_description_content_type="text/markdown",
-		url="https://github.com/edmundsj/pyscpi",
+		url="https://github.com/edmundsj/scippy",
 		packages=setuptools.find_packages(),
 		include_package_data=True,
 		package_data={
-			"pyscpi": package_data
+			"scippy": package_data
 			},
 		classifiers=[
 			"Programming Language :: Python :: 3",

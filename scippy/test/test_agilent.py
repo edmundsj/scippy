@@ -1,4 +1,4 @@
-from pyscpi import Agilent
+from scippy import Agilent
 import numpy as np
 import pyvisa
 import pytest

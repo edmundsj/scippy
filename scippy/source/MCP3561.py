@@ -2,7 +2,7 @@
 
 """
 import pyvisa
-from pyscpi import SCPIDevice, twos_to_voltage, twos_to_integer, MotorController
+from scippy import SCPIDevice, twos_to_voltage, twos_to_integer, MotorController
 import os
 import numpy as np
 import pandas as pd

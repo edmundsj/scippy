@@ -1,4 +1,4 @@
-from pyscpi import twos_to_integer, twos_to_voltage, count_to_voltage
+from scippy import twos_to_integer, twos_to_voltage, count_to_voltage
 import pytest
 from numpy.testing import assert_equal, assert_allclose
 import numpy as np

@@ -1,5 +1,5 @@
 import pytest
-from pyscpi import MCP, Agilent, twos_to_integer
+from scippy import MCP, Agilent, twos_to_integer
 from numpy.testing import assert_equal
 import numpy as np
 import pandas as pd

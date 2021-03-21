@@ -1,4 +1,4 @@
-from pyscpi import SCPIDevice
+from scippy import SCPIDevice
 import numpy as np
 
 class Agilent33210A(SCPIDevice):

@@ -1,5 +1,5 @@
 import pytest
-from pyscpi import MCP
+from scippy import MCP
 from numpy.testing import assert_allclose, assert_equal
 import time
 
