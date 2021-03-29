@@ -1,5 +1,6 @@
-from scippy import SCPIDevice
+from scippy import SCPIDevice, ureg
 import numpy as np
+import pint
 
 class Agilent33210A(SCPIDevice):
     MIN_AMPLITUDE = 0.01
@@ -10,63 +11,63 @@ class Agilent33210A(SCPIDevice):
                 lib_type=lib_type, device_name=device_name,
                 read_termination=read_termination,
                 write_termination=write_termination)
-        self._frequency = 1000 # Default frequency
-        self._amplitude = 0.1
-        self._offset_voltage = 0
+        self._frequency = 1000*ureg.Hz # Default frequency
+        self._amplitude = 0.1*ureg.V
+        self._offset_voltage = 0*ureg.V
         self._output_on = False
 
     @property
+    @ureg.wraps(ureg.Hz, None, strict=False)
     def frequency(self):
         freq = self.query('FREQUENCY?')
         return float(freq)
 
     @frequency.setter
+    @ureg.wraps(None, (None, ureg.Hz), strict=False)
     def frequency(self, frequency):
         self._frequency = frequency
         self.write_line('FREQUENCY ' + str(frequency) + 'HZ')
 
     @property
-    def amplitude(self, mode='amp'):
+    @ureg.wraps(ureg.V, None, strict=False)
+    def amplitude(self):
         amplitude = float(self.query('VOLTAGE?'))
-        if mode == 'rms':
-            amplitude /= np.sqrt(2)
-        elif mode == 'pkpk':
-            amplitude *= 2
-        elif mode == 'amp':
-            amplitude *= 1
-
-
-        return float(amplitude)
+        return amplitude
 
     @amplitude.setter
-    def amplitude(self, amplitude, mode='amp'):
+    @ureg.wraps(None, (None, ureg.V), strict=False)
+    def amplitude(self, amplitude):
         """ Sets the amplitude of the excitation (Vpp)
 
         :param amplitude: Amplitude of excitation (Vpp)
         """
-        if mode == 'rms':
-            amplitude *= np.sqrt(2)
-        elif mode == 'pkpk':
-            amplitude *= 0.5
-        elif mode == 'amp':
-            amplitude *= 1
         if amplitude < 0.01:
             amplitude = 0.01
             self._amplitude = amplitude
             self.write_line('VOLTAGE ' + str(amplitude) + 'V')
             raise UserWarning(f'Attempted to set amplitude to {amplitude}. Lowest possible amplitude for this device is {self.MIN_AMPLITUDE}. Setting amplitude to {self.MIN_AMPLITUDE}')
 
-        self._amplitude = amplitude
+        if isinstance(amplitude, pint.Quantity):
+            self._amplitude = amplitude
+        else:
+            self._amplitude = amplitude * ureg.V
+
         self.write_line('VOLTAGE ' + str(amplitude) + 'V')
 
     @property
+    @ureg.wraps(ureg.V, None, strict=False)
     def offset_voltage(self):
         volt = self.query('VOLTAGE:OFFSET?')
         return float(volt)
 
     @offset_voltage.setter
+    @ureg.wraps(None, (None, ureg.V), strict=False)
     def offset_voltage(self, offset):
-        self._offset_voltage = offset
+        if isinstance(offset, pint.Quantity):
+            self._offset_voltage = offset
+        else:
+            self._offset_voltage = offset * ureg.V
+
         self.write_line('VOLTAGE:OFFSET ' + str(offset) + 'V')
 
     @property

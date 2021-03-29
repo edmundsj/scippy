@@ -1,4 +1,4 @@
-from scippy import Agilent
+from scippy import Agilent, ureg
 import numpy as np
 import pyvisa
 import pytest
@@ -34,42 +34,50 @@ def test_identify(agilent):
 
 @pytest.mark.agilent
 def test_reset(agilent):
-    desired_frequency = 1000
-    desired_amplitude = 0.1
-    desired_offset = 0
+    desired_frequency = 1000*ureg.Hz
+    desired_amplitude = 0.1*ureg.V
+    desired_offset = 0*ureg.V
     agilent['device'].reset()
     actual_frequency = agilent['device'].frequency
     actual_voltage = agilent['device'].amplitude
     actual_output = agilent['device'].output_on
     actual_offset = agilent['device'].offset_voltage
 
-    assert_equal(actual_voltage, desired_amplitude)
-    assert_equal(actual_frequency, desired_frequency)
+    assert actual_voltage == desired_amplitude
+    assert actual_frequency == desired_frequency
     assert_equal(actual_output, False)
-    assert_equal(actual_offset, desired_offset)
+    assert actual_offset == desired_offset
 
 @pytest.mark.agilent
 def test_set_amplitude(agilent):
-    desired_voltage = 0.5
+    desired_voltage = 0.5*ureg.V
     agilent['device'].amplitude= desired_voltage
     actual_voltage = agilent['device'].amplitude
-    assert_equal(actual_voltage, desired_voltage)
+    assert actual_voltage == desired_voltage
 
 @pytest.mark.agilent
 def test_set_amplitude_limit(agilent):
-    desired_voltage = 0.009 # Smaller than we can handle
-    minimum_amplitude = 0.01
+    desired_voltage = 9*ureg.mV # Smaller than we can handle
+    minimum_amplitude = 0.01*ureg.V
     with pytest.raises(UserWarning):
         agilent['device'].amplitude = desired_voltage
 
-    assert_equal(agilent['device'].amplitude, minimum_amplitude)
+    actual_amplitude = agilent['device'].amplitude
+    desired_amplitude = minimum_amplitude
+    assert actual_amplitude == desired_amplitude
+
+def test_set_amplitude_units(agilent):
+    desired_voltage = 50*ureg.mV
+    agilent['device'].amplitude= desired_voltage
+    actual_voltage = agilent['device'].amplitude
+    assert actual_voltage == desired_voltage
 
 @pytest.mark.agilent
 def test_set_frequency(agilent):
-    desired_frequency = 100
+    desired_frequency = 100*ureg.Hz
     agilent['device'].frequency = desired_frequency
     actual_frequency = agilent['device'].frequency
-    assert_equal(actual_frequency, desired_frequency)
+    assert actual_frequency == desired_frequency
 
 @pytest.mark.agilent
 def test_set_output(agilent):
@@ -85,10 +93,10 @@ def test_set_output(agilent):
 
 @pytest.mark.agilent
 def test_offset(agilent):
-    offset_desired = 0.1
+    offset_desired = 0.1*ureg.V
     agilent['device'].offset_voltage = offset_desired
     offset_actual = agilent['device'].offset_voltage
-    assert_equal(offset_actual, offset_desired)
+    assert offset_actual == offset_desired
 
 @pytest.mark.agilent
 def test_verify_correct(agilent):
