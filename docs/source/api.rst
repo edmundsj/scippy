@@ -19,6 +19,11 @@ scippy API Documentation
     :undoc-members:
     :noindex:
 
+.. autoclass:: Keithley2400.Keithley2400
+    :members:
+    :undoc-members:
+    :noindex:
+
 
 Indices and tables
 ==================
