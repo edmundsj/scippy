@@ -17,7 +17,7 @@ This package can be installed directly with pip from [pypi](https://pypi.org/pro
 pip install scippy
 ```
 
-### Simple Example
+### Agilent Example
 The following example sets the frequency, amplitude, and output state of an Agilent 33210A instrument, and verifies that the parameters match the ones you set.
 
 ```
@@ -28,3 +28,17 @@ agilent.frequency = 2500
 agilent.amplitude = 0.5
 agilent.output_on = True
 agilent.verify()
+```
+
+### Keithley Example
+The following sets up a Keithley 2400 source meter, sets the voltage compliance, and sets a current
+
+```
+from scippy import Keithley, ureg
+
+keithley = Keithley()
+keithley.current = 0.05 # Units assumed to be in Amps
+keithley.voltage_compliance = 25 * ureg.mV # Set compliance to 25mV
+keithley.output_on = True # Set the output on
+
+```

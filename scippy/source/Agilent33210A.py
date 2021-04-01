@@ -1,3 +1,6 @@
+"""
+
+"""
 from scippy import SCPIDevice, ureg
 import numpy as np
 import pint
@@ -7,6 +10,14 @@ class Agilent33210A(SCPIDevice):
 
     def __init__(self, lib_type='pyvisa',
             device_name='Agilent Technologies,33210A,MY48005679,1.04-1.04-22-2', read_termination='\n', write_termination='\n'):
+        """
+        Agilent 33210A function generator object
+
+        :param device_name: Manufacturer device name
+        :param read_termination: Read termination character(s)
+        :param write_termination: Write termination character(s)
+
+        """
         super().__init__(
                 lib_type=lib_type, device_name=device_name,
                 read_termination=read_termination,
@@ -19,28 +30,33 @@ class Agilent33210A(SCPIDevice):
     @property
     @ureg.wraps(ureg.Hz, None, strict=False)
     def frequency(self):
+        """
+        Frequency of the applied signal
+        """
         freq = self.query('FREQUENCY?')
         return float(freq)
 
     @frequency.setter
     @ureg.wraps(None, (None, ureg.Hz), strict=False)
     def frequency(self, frequency):
-        self._frequency = frequency
+        if isinstance(frequency, pint.Quantity):
+            self._frequency = frequency
+        else:
+            self._frequency = frequency * ureg.Hz
         self.write_line('FREQUENCY ' + str(frequency) + 'HZ')
 
     @property
     @ureg.wraps(ureg.V, None, strict=False)
     def amplitude(self):
+        """
+        Amplitude of the applied signal. Input is in volts (amplitude)
+        """
         amplitude = float(self.query('VOLTAGE?'))
         return amplitude
 
     @amplitude.setter
     @ureg.wraps(None, (None, ureg.V), strict=False)
     def amplitude(self, amplitude):
-        """ Sets the amplitude of the excitation (Vpp)
-
-        :param amplitude: Amplitude of excitation (Vpp)
-        """
         if amplitude < 0.01:
             amplitude = 0.01
             self._amplitude = amplitude
@@ -57,6 +73,9 @@ class Agilent33210A(SCPIDevice):
     @property
     @ureg.wraps(ureg.V, None, strict=False)
     def offset_voltage(self):
+        """
+        DC offset voltage of the applied signal
+        """
         volt = self.query('VOLTAGE:OFFSET?')
         return float(volt)
 
@@ -72,6 +91,9 @@ class Agilent33210A(SCPIDevice):
 
     @property
     def output_on(self):
+        """
+        Whether the output is on (True) or off (False)
+        """
         return bool(int(self.query('OUTPUT?')))
 
     @output_on.setter
@@ -85,7 +107,7 @@ class Agilent33210A(SCPIDevice):
 
     def verify(self):
         """
-        Verifies that our system state matches our believed state
+        Verifies that our system state matches our believed state.
         """
         actual_amplitude = self.amplitude
         actual_frequency = self.frequency

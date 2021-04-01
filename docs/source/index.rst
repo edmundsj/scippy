@@ -1,17 +1,17 @@
 .. _template-name:
 .. Documentation for Template
 
-Welcome to a Github Template
+scippy Documentation
 =============================================
 
-.. .. autoclass:: LIA.LIA
-    :members:
-    :undoc-members:
+Getting Started
+-------------------
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   api
 
 
 Indices and tables

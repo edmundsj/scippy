@@ -11,7 +11,19 @@ import json
 class MCP3561(SCPIDevice, MotorController):
     def __init__(self, lib_type='pyserial',
             device_name='MCP3561 Dev Board v1', read_termination='\r\n', write_termination='\n', sampling_frequency=9765.65,
-            n_samples=1, offset_voltage=1.138):
+            n_samples=1, offset_voltage=1.198):
+        """
+        Implementation of communication device for the MCP3561 ADC and an accompanying development board.
+
+        :param lib_type: "pyvisa" or "pyserial".
+        :param device_name: Device name as it responds to the identify command
+        :param read_termination: Read termination character
+        :param write_termination: Write termination character
+        :param n_samples: Number of samples to take
+        :param offset_voltage: Calibrated zero-point voltage.
+        :param sampling_frequency: Sampling frequency of the device. Not currently settable.
+
+        """
         self.lib_type = lib_type
         super().__init__(lib_type=lib_type, device_name=device_name,
                 read_termination=read_termination,
@@ -32,14 +44,11 @@ class MCP3561(SCPIDevice, MotorController):
         else:
              self._wavelength = 1000
 
-
-    """
-    Check that all the parameters are what we want them to be
-    """
-#def verify(self):
-
     @property
     def n_samples(self):
+        """
+        Number of samples the device should measure, where each sample is a single 24-bit measurement.
+        """
         return self._n_samples
 
     @n_samples.setter
@@ -50,6 +59,11 @@ class MCP3561(SCPIDevice, MotorController):
             self.write_line('CONFIGURE ' + str(n_samples))
 
     def measure(self):
+        """
+        Measures data from the MCP dev board.
+
+        :returns byte_array: Raw array of bytes as measured by the MCP
+        """
         old_timeout = self.device.timeout
         measurement_time_ms = 1000*self._n_samples / self.sampling_frequency
         if(measurement_time_ms > self.device.timeout - 100):
@@ -97,9 +111,11 @@ class MCP3561(SCPIDevice, MotorController):
 
     def generate_data(self, sync=True):
         """
+        Generates time-series voltage data with or without synchronization points
+
         :param n_samples: The number of points of data to collect
         :param sync: Whether to report synchronization points from an external reference (True/False)
-        :returns: data - a pandas data frame
+        :returns: data - a pandas data frame with voltages, times, and (optional) sync points
         """
         voltages = twos_to_voltage(self.measure()) - self.offset_voltage
         times = np.linspace(0, self.n_samples / self.sampling_frequency,
