@@ -160,5 +160,10 @@ def test_measure(keithley, timeout):
     keithley['device'].voltage = desired_voltage
     actual_voltage, actual_current = keithley['device'].measure()
     assert_equal_qt(actual_voltage, desired_voltage)
-    breakpoint()
     assert abs(actual_current) < 0.1*ureg.nA
+
+@pytest.mark.keithley
+def test_measure_warning(keithley, timeout):
+    with pytest.raises(UserWarning):
+        keithley['device'].current = 0.01
+        voltage, current = keithley['device'].measure()
