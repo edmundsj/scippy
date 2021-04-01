@@ -4,6 +4,7 @@
 from scippy import SCPIDevice, ureg
 import numpy as np
 import pint
+import warnings
 
 class Keithley2400(SCPIDevice):
     COMPLIANCE_CEILING = 9.910000E+37
@@ -128,12 +129,15 @@ class Keithley2400(SCPIDevice):
         """
         result = self.query('measure?')
         numerical_results = [float(x) for x in result.split(',')]
-        voltage = numerical_results[0]
-        current = numerical_results[1]
+        voltage = numerical_results[0]*ureg.V
+        current = numerical_results[1]*ureg.A
 
-        if voltage == self.COMPLIANCE_CEILING:
-            raise UserWarning('Warning: voltage at compliance limit.')
-        if current == self.COMPLIANCE_CEILING:
-            raise UserWarning('Warning: current at compliance limit.')
-        return voltage*ureg.V, current*ureg.A
+        if voltage.m == self.COMPLIANCE_CEILING:
+            voltage = self._voltage_compliance
+            warnings.warn('Warning: voltage at compliance limit of {voltage}.', UserWarning)
+        if current.m == self.COMPLIANCE_CEILING:
+            current = self._current_compliance
+            warnings.warn('Warning: current at compliance limit of {current}', UserWarning)
+
+        return voltage, current
 

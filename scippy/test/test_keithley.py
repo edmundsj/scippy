@@ -164,6 +164,6 @@ def test_measure(keithley, timeout):
 
 @pytest.mark.keithley
 def test_measure_warning(keithley, timeout):
-    with pytest.raises(UserWarning):
+    with pytest.warns(UserWarning):
         keithley['device'].current = 0.01
         voltage, current = keithley['device'].measure()
