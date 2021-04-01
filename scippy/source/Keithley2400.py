@@ -6,12 +6,13 @@ import numpy as np
 import pint
 
 class Keithley2400(SCPIDevice):
-    MIN_AMPLITUDE = 0.01
+    COMPLIANCE_CEILING = 9.910000E+37
+
 
     def __init__(self, lib_type='pyvisa',
             device_name='KEITHLEY INSTRUMENTS INC.,MODEL 2400,1207317,C30   Mar 17 2006 09:29:29/A02  /K/J', read_termination='\r', write_termination='\r'):
         """
-        Agilent 33210A function generator object
+        Keithley 2400 measurement
 
         :param device_name: Manufacturer device name
         :param read_termination: Read termination character(s)
@@ -120,3 +121,19 @@ class Keithley2400(SCPIDevice):
     def voltage_compliance(self, compliance):
         self._voltage_compliance = compliance
         self.write_line(f'sense:voltage:protection:level {compliance}')
+
+    def measure(self):
+        """
+        Returns the measured current if in voltage mode and the measured current if in voltage mode, along with the set voltage in voltage mode or the set current in current mode
+        """
+        result = self.query('measure?')
+        numerical_results = [float(x) for x in result.split(',')]
+        voltage = numerical_results[0]
+        current = numerical_results[1]
+
+        if voltage == self.COMPLIANCE_CEILING:
+            raise UserWarning('Warning: voltage at compliance limit.')
+        if current == self.COMPLIANCE_CEILING:
+            raise UserWarning('Warning: current at compliance limit.')
+        return voltage*ureg.V, current*ureg.A
+

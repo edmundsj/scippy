@@ -153,3 +153,12 @@ def test_set_current_to_voltage(keithley, timeout):
     actual_mode = keithley['device'].mode
     desired_mode = 'voltage'
     assert_equal(actual_mode, desired_mode)
+
+@pytest.mark.keithley
+def test_measure(keithley, timeout):
+    desired_voltage = 1 * ureg.V
+    keithley['device'].voltage = desired_voltage
+    actual_voltage, actual_current = keithley['device'].measure()
+    assert_equal_qt(actual_voltage, desired_voltage)
+    breakpoint()
+    assert abs(actual_current) < 0.1*ureg.nA

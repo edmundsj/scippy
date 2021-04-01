@@ -39,6 +39,8 @@ from scippy import Keithley, ureg
 keithley = Keithley()
 keithley.current = 0.05 # Units assumed to be in Amps
 keithley.voltage_compliance = 25 * ureg.mV # Set compliance to 25mV
-keithley.output_on = True # Set the output on
+voltage, current = keithley.measure() # Sets the output on, measures the current and voltage
+print(voltage)
+print(current)
 
 ```
