@@ -71,8 +71,8 @@ class SCPIDevice:
         :param read_termination: Read termination character(s)
         :param write_termination: Write termination character(s)
         """
+        rm = pyvisa.ResourceManager()
         if resource_list == []:
-            rm = pyvisa.ResourceManager()
             resource_list = rm.list_resources()
         self.is_gpib = False
         self.is_generic = False
@@ -115,22 +115,19 @@ class SCPIDevice:
                 else: # This is currently not working.
                     print(f'Communication timeout error. Attempting to reconnect to device {rname}')
                     time.sleep(1)
-                    if timeout_counter == 0:
-                        self.get_visa_device(
-                                device_name=device_name,
-                                read_termination=read_termination,
-                                write_termination=write_termination,
-                                baud_rate=baud_rate,
-                                resource_list=resource_list[i:],
-                                timeout_counter=timeout_counter+1)
+                    if timeout_counter < 2:
+                        new_timeout = timeout_counter + 1
+                        new_list = resource_list[i:]
                     elif timeout_counter >= 2:
-                        self.get_visa_device(
-                                device_name=device_name,
-                                read_termination=read_termination,
-                                write_termination=write_termination,
-                                baud_rate=baud_rate,
-                                resource_list=resource_list[i+1:],
-                                timeout_counter=0)
+                        new_timeout = 0
+                        new_list = resource_list[i+1:]
+                    self.get_visa_device(
+                            device_name=device_name,
+                            read_termination=read_termination,
+                            write_termination=write_termination,
+                            baud_rate=baud_rate,
+                            resource_list=new_list,
+                            timeout_counter=new_timeout)
 
     @property
     def read_termination(self):
