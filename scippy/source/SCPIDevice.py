@@ -87,10 +87,7 @@ class SCPIDevice:
                             read_termination=read_termination,
                             write_termination=write_termination)
                 elif self.is_gpib:
-                    if read_termination != write_termination:
-                        raise ValueError('Error. For GPIB Instruments read and write termination chars must be identical.')
-                    self.device = rm.open_resource(rname,
-                            term_chars=read_termination)
+                    self.device = rm.open_resource(rname)
 
                 self._read_termination = read_termination
                 self._write_termination = write_termination
