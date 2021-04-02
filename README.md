@@ -44,3 +44,6 @@ print(voltage)
 print(current)
 
 ```
+
+### Common Issues (Keithley)
+Some instruments, unfortunately, have much less reliable communication interfaces than others. In particular, the Keithley is extremely sensitive to not being closed.

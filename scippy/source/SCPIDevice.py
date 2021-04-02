@@ -6,7 +6,8 @@ import time
 
 class SCPIDevice:
     def __init__(self, lib_type='pyvisa', device_name='',
-            read_termination='\n', write_termination='\n'):
+            read_termination='\n', write_termination='\n',
+            baud_rate=9600):
         """
         Base class for devices which use SCPI for communication. Works with either pyvisa or pyserial.
 
@@ -19,15 +20,17 @@ class SCPIDevice:
         if self.lib_type == 'pyvisa':
             self.get_visa_device(device_name=device_name,
                     read_termination=read_termination,
-                    write_termination=write_termination)
+                    write_termination=write_termination,
+                    baud_rate=baud_rate)
         else:
             self.get_serial_device(device_name=device_name,
                     read_termination=read_termination,
-                    write_termination=write_termination)
+                    write_termination=write_termination,
+                    baud_rate=baud_rate)
 
     def get_serial_device(
             self, device_name='', read_termination='\n',
-            write_termination='\n'):
+            write_termination='\n', baud_rate=9600):
         r"""
         Searches for and initializes USB device with pyserial with the desired name
 
@@ -47,6 +50,7 @@ class SCPIDevice:
             self.write_termination = write_termination
             self.device = serial.Serial(port_names[index])
             self.device.timeout = 0.05
+            self.device.baud_rate = baud_rate
             actual_name = self.identify()
             if device_name == '':
                 break
@@ -55,7 +59,7 @@ class SCPIDevice:
 
     def get_visa_device(
             self, device_name='', read_termination='\n',
-            write_termination='\n'):
+            write_termination='\n', baud_rate=9600):
         """
         Initializes our device using the Visa resource manager
 
@@ -69,9 +73,12 @@ class SCPIDevice:
             raise RuntimeError("No resources found")
         for rname in resource_list:
             try:
-                self.device = rm.open_resource(rname)
-                self.read_termination = read_termination
-                self.write_termination = write_termination
+                self.device = rm.open_resource(
+                        rname, baud_rate=baud_rate,
+                        read_termination=read_termination,
+                        write_termination=write_termination)
+                self._read_termination = read_termination
+                self._write_termination = write_termination
                 device_name_actual = self.identify()
                 if device_name == '':
                     break # Use the first available resource
@@ -80,12 +87,17 @@ class SCPIDevice:
                         break # Use the resource with the desired name
             except UserWarning:
                 pass
-            except pyvisa.errors.VisaIOError: # try again
-                time.sleep(1)
-                self.get_visa_device(
-                        device_name=device_name,
-                        read_termination=read_termination,
-                        write_termination=write_termination)
+            except pyvisa.errors.VisaIOError as e:
+                if e.abbreviation == 'VI_ERROR_RSRC_BUSY':
+                    raise Exception('It appears VISA is having a heart attack. Try unplugging and plugging back in your device / USB hub, or closing out any other running python terminals or programs which might be trying to access this resource.')
+                else: # This is currently not working.
+                    breakpoint()
+                    time.sleep(1)
+                    self.get_visa_device(
+                            device_name=device_name,
+                            read_termination=read_termination,
+                            write_termination=write_termination,
+                            baud_rate=baud_rate)
 
     @property
     def read_termination(self):

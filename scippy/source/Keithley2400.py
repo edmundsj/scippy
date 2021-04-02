@@ -11,7 +11,7 @@ class Keithley2400(SCPIDevice):
 
 
     def __init__(self, lib_type='pyvisa',
-            device_name='KEITHLEY INSTRUMENTS INC.,MODEL 2400,1207317,C30   Mar 17 2006 09:29:29/A02  /K/J', read_termination='\r', write_termination='\r'):
+            device_name='KEITHLEY INSTRUMENTS INC.,MODEL 2400,1207317,C30   Mar 17 2006 09:29:29/A02  /K/J', read_termination='\r', write_termination='\r', baud_rate=57600):
         """
         Keithley 2400 measurement
 
@@ -23,7 +23,8 @@ class Keithley2400(SCPIDevice):
         super().__init__(
                 lib_type=lib_type, device_name=device_name,
                 read_termination=read_termination,
-                write_termination=write_termination)
+                write_termination=write_termination,
+                baud_rate=baud_rate)
 
         self._mode = 'voltage'
         self._current_compliance = 105.0*ureg.uA
@@ -123,21 +124,32 @@ class Keithley2400(SCPIDevice):
         self._voltage_compliance = compliance
         self.write_line(f'sense:voltage:protection:level {compliance}')
 
-    def measure(self):
+    def measure(self, measure_mode=None):
         """
         Returns the measured current if in voltage mode and the measured current if in voltage mode, along with the set voltage in voltage mode or the set current in current mode
         """
-        result = self.query('measure?')
+        if measure_mode is None:
+            if self._mode == 'voltage':
+                measure_mode = 'current'
+            elif self._mode == 'current':
+                measure_mode = 'voltage'
+        if measure_mode == 'voltage':
+            result = self.query('measure:voltage?')
+        elif measure_mode == 'current':
+            result = self.query('measure:current?')
+        else:
+            raise ValueError(f'Invalid measurement mode {mode}. Available modes are "current" and "voltage".')
+
         numerical_results = [float(x) for x in result.split(',')]
         voltage = numerical_results[0]*ureg.V
         current = numerical_results[1]*ureg.A
 
         if voltage.m == self.COMPLIANCE_CEILING:
-            voltage = self._voltage_compliance
-            warnings.warn('Warning: voltage at compliance limit of {voltage}.', UserWarning)
+            voltage = self._voltage_compliance*ureg.V
+            warnings.warn(f'Warning: voltage at compliance limit of {voltage}.', UserWarning)
         if current.m == self.COMPLIANCE_CEILING:
-            current = self._current_compliance
-            warnings.warn('Warning: current at compliance limit of {current}', UserWarning)
+            current = self._current_compliance*ureg.A
+            warnings.warn(f'Warning: current at compliance limit of {current}', UserWarning)
 
         return voltage, current
 
