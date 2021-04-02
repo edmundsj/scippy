@@ -3,6 +3,7 @@ import serial
 from serial.tools.list_ports import comports
 import numpy as np
 import time
+import re
 
 class SCPIDevice:
     def __init__(self, lib_type='pyvisa', device_name='',
@@ -69,14 +70,28 @@ class SCPIDevice:
         """
         rm = pyvisa.ResourceManager()
         resource_list = rm.list_resources()
+        self.is_gpib = False
+        self.is_generic = False
         if len(resource_list) == 0:
             raise RuntimeError("No resources found")
         for rname in resource_list:
             try:
-                self.device = rm.open_resource(
-                        rname, baud_rate=baud_rate,
-                        read_termination=read_termination,
-                        write_termination=write_termination)
+                if re.search('ASRL\d+::', rname) is not None:
+                    self.is_generic = True
+                if re.search('GPIB\d+::', rname) is not None:
+                    self.is_gpib = True
+
+                if self.is_generic:
+                    self.device = rm.open_resource(
+                            rname, baud_rate=baud_rate,
+                            read_termination=read_termination,
+                            write_termination=write_termination)
+                elif self.is_gpib:
+                    if read_termination != write_termination:
+                        raise ValueError('Error. For GPIB Instruments read and write termination chars must be identical.')
+                    self.device = rm.open_resource(rname,
+                            term_chars=read_termination)
+
                 self._read_termination = read_termination
                 self._write_termination = write_termination
                 device_name_actual = self.identify()
@@ -88,10 +103,11 @@ class SCPIDevice:
             except UserWarning:
                 pass
             except pyvisa.errors.VisaIOError as e:
-                if e.abbreviation == 'VI_ERROR_RSRC_BUSY':
+                if e.abbreviation == 'VI_ERROR_RSRC_NFOUND':
+                    pass
+                elif e.abbreviation == 'VI_ERROR_RSRC_BUSY':
                     raise Exception('It appears VISA is having a heart attack. Try unplugging and plugging back in your device / USB hub, or closing out any other running python terminals or programs which might be trying to access this resource.')
                 else: # This is currently not working.
-                    breakpoint()
                     time.sleep(1)
                     self.get_visa_device(
                             device_name=device_name,
