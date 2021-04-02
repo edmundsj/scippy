@@ -138,7 +138,7 @@ class Keithley2400(SCPIDevice):
         elif measure_mode == 'current':
             result = self.query('measure:current?')
         else:
-            raise ValueError(f'Invalid measurement mode {mode}. Available modes are "current" and "voltage".')
+            raise ValueError(f'Invalid measurement mode {measure_mode}. Available modes are "current" and "voltage".')
 
         numerical_results = [float(x) for x in result.split(',')]
         voltage = numerical_results[0]*ureg.V
