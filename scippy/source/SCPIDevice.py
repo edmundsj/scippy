@@ -21,12 +21,12 @@ class SCPIDevice:
         self.lib_type = lib_type
         if self.lib_type == 'pyvisa':
             self.get_visa_device(device_name=device_name,
+                    resource_name=resource_name,
                     read_termination=read_termination,
                     write_termination=write_termination,
                     baud_rate=baud_rate)
         else:
             self.get_serial_device(device_name=device_name,
-                    resource_name=resource_name,
                     read_termination=read_termination,
                     write_termination=write_termination,
                     baud_rate=baud_rate)
@@ -104,7 +104,7 @@ class SCPIDevice:
                 else:
                     if device_name == device_name_actual:
                         print(f'Correct device found.')
-                        break # Use the resource with the desired name
+                        return
             except UserWarning:
                 pass
             except pyvisa.errors.VisaIOError as e:
