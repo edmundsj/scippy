@@ -7,6 +7,7 @@ import re
 
 class SCPIDevice:
     def __init__(self, lib_type='pyvisa', device_name='',
+            resource_name='',
             read_termination='\n', write_termination='\n',
             baud_rate=9600):
         """
@@ -25,6 +26,7 @@ class SCPIDevice:
                     baud_rate=baud_rate)
         else:
             self.get_serial_device(device_name=device_name,
+                    resource_name=resource_name,
                     read_termination=read_termination,
                     write_termination=write_termination,
                     baud_rate=baud_rate)
@@ -59,7 +61,8 @@ class SCPIDevice:
                 break
 
     def get_visa_device(
-            self, device_name='', read_termination='\n',
+            self, device_name='', resource_name='',
+            read_termination='\n',
             write_termination='\n', baud_rate=9600):
         """
         Initializes our device using the Visa resource manager
@@ -74,6 +77,8 @@ class SCPIDevice:
         self.is_generic = False
         if len(resource_list) == 0:
             raise RuntimeError("No resources found")
+        if resource_name != '':
+            resource_list = [resource_name]
         for rname in resource_list:
             try:
                 print(f'Attempting connection to {rname}...')
