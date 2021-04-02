@@ -76,6 +76,7 @@ class SCPIDevice:
             raise RuntimeError("No resources found")
         for rname in resource_list:
             try:
+                print(f'Attempting connection to {rname}...')
                 if re.search('ASRL\d+::', rname) is not None:
                     self.is_generic = True
                 if re.search('GPIB\d+::', rname) is not None:
@@ -96,15 +97,17 @@ class SCPIDevice:
                     break # Use the first available resource
                 else:
                     if device_name == device_name_actual:
+                        print(f'Correct device found.')
                         break # Use the resource with the desired name
             except UserWarning:
                 pass
             except pyvisa.errors.VisaIOError as e:
                 if e.abbreviation == 'VI_ERROR_RSRC_NFOUND':
-                    pass
+                    print(f'VISA resource not found. Trying next device...')
                 elif e.abbreviation == 'VI_ERROR_RSRC_BUSY':
                     raise Exception('It appears VISA is having a heart attack. Try unplugging and plugging back in your device / USB hub, or closing out any other running python terminals or programs which might be trying to access this resource.')
                 else: # This is currently not working.
+                    print(f'Communication timeout error. Attempting to reconnect to device {rname}')
                     time.sleep(1)
                     self.get_visa_device(
                             device_name=device_name,
