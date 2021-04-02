@@ -40,7 +40,9 @@ with open("README.md", "r") as fh:
 				'scipy>=1.2.2',
 				'pyyaml>=5.1.1',
                 'pint>=0.16.0',
-                'sciparse'
+                'sciparse',
+                'pyvisa',
+                'pyserial',
 		],
 	license="MIT",
 	)
