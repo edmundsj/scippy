@@ -118,7 +118,7 @@ class SCPIDevice:
                             device_name=device_name,
                             read_termination=read_termination,
                             write_termination=write_termination,
-                            baud_rate=baud_rate)
+                            baud_rate=baud_rate, resource_name=rname)
 
     @property
     def read_termination(self):

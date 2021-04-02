@@ -11,7 +11,8 @@ class Keithley2400(SCPIDevice):
 
 
     def __init__(self, lib_type='pyvisa',
-            device_name='KEITHLEY INSTRUMENTS INC.,MODEL 2400,1207317,C30   Mar 17 2006 09:29:29/A02  /K/J', read_termination='\r', write_termination='\r', baud_rate=57600):
+            device_name='KEITHLEY INSTRUMENTS INC.,MODEL 2400,1207317,C30   Mar 17 2006 09:29:29/A02  /K/J', resource_name='',
+            read_termination='\r', write_termination='\r', baud_rate=57600):
         """
         Keithley 2400 measurement
 
@@ -24,7 +25,7 @@ class Keithley2400(SCPIDevice):
                 lib_type=lib_type, device_name=device_name,
                 read_termination=read_termination,
                 write_termination=write_termination,
-                baud_rate=baud_rate)
+                baud_rate=baud_rate, resource_name=resource_name)
 
         self._mode = 'voltage'
         self._current_compliance = 105.0*ureg.uA
