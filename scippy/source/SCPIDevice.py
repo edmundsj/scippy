@@ -61,9 +61,9 @@ class SCPIDevice:
                 break
 
     def get_visa_device(
-            self, device_name='', resource_name='',
+            self, device_name='', resource_name='', resource_list=[],
             read_termination='\n',
-            write_termination='\n', baud_rate=9600):
+            write_termination='\n', baud_rate=9600, timeout_counter=0):
         """
         Initializes our device using the Visa resource manager
 
@@ -71,15 +71,16 @@ class SCPIDevice:
         :param read_termination: Read termination character(s)
         :param write_termination: Write termination character(s)
         """
-        rm = pyvisa.ResourceManager()
-        resource_list = rm.list_resources()
+        if resource_list == []:
+            rm = pyvisa.ResourceManager()
+            resource_list = rm.list_resources()
         self.is_gpib = False
         self.is_generic = False
         if len(resource_list) == 0:
             raise RuntimeError("No resources found")
         if resource_name != '':
             resource_list = [resource_name]
-        for rname in resource_list:
+        for i, rname in enumerate(resource_list):
             try:
                 print(f'Attempting connection to {rname}...')
                 if re.search('ASRL\d+::', rname) is not None:
@@ -114,11 +115,22 @@ class SCPIDevice:
                 else: # This is currently not working.
                     print(f'Communication timeout error. Attempting to reconnect to device {rname}')
                     time.sleep(1)
-                    self.get_visa_device(
-                            device_name=device_name,
-                            read_termination=read_termination,
-                            write_termination=write_termination,
-                            baud_rate=baud_rate, resource_name=rname)
+                    if timeout_counter == 0:
+                        self.get_visa_device(
+                                device_name=device_name,
+                                read_termination=read_termination,
+                                write_termination=write_termination,
+                                baud_rate=baud_rate,
+                                resource_list=resource_list[i:],
+                                timeout_counter=timeout_counter+1)
+                    elif timeout_counter >= 2:
+                        self.get_visa_device(
+                                device_name=device_name,
+                                read_termination=read_termination,
+                                write_termination=write_termination,
+                                baud_rate=baud_rate,
+                                resource_list=resource_list[i+1:],
+                                timeout_counter=0)
 
     @property
     def read_termination(self):
