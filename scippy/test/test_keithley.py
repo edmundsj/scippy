@@ -217,3 +217,5 @@ def test_current_range_auto(keithley, timeout):
     keithley['device'].current = 2*ureg.uA
     actual_range = keithley['device'].current_range
     assert_equal_qt(actual_range, desired_range)
+
+# TODO: ADD CHECK FOR COMPLIANCE TRIPPED UNIT TESTS

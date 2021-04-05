@@ -38,8 +38,8 @@ class Keithley2400(SCPIDevice):
         self.mode = self._mode
         self.current_compliance = self._current_compliance
         self.voltage_compliance = self._voltage_compliance
-        self.voltage_range = 21*ureg.V
-        self.current_range = 1.05*ureg.uA
+        self.voltage_range = self.voltage_range
+        self.current_range = self.current_range
         self.voltage = self._voltage
         self.current = self._current
 
@@ -55,8 +55,10 @@ class Keithley2400(SCPIDevice):
         self._voltage = voltage
         if self._mode == 'current':
             self.mode = 'voltage'
-#if voltage > self._voltage_range:
-#self.voltage_range = voltage
+        if not isinstance(voltage, pint.Quantity):
+            voltage_to_compare = voltage* ureg.V
+        if voltage_to_compare > self._voltage_range:
+            self.voltage_range = voltage
         self.write_line(f'source:voltage:level {voltage}')
 
     @property
@@ -71,8 +73,11 @@ class Keithley2400(SCPIDevice):
         self._current = current
         if self._mode == 'voltage':
             self.mode = 'current'
-#if current > self._current_range:
-#self.current_range = current
+        if not isinstance(current, pint.Quantity):
+            current_to_compare = current * ureg.A
+        if current_to_compare > self._current_range:
+            self.current_range = current
+
         self.write_line(f'source:current:level {current}')
 
     @property
@@ -142,7 +147,10 @@ class Keithley2400(SCPIDevice):
     @voltage_range.setter
     @ureg.wraps(None, (None, ureg.V), False)
     def voltage_range(self, voltage):
-        self.write_line('source:voltage:range {voltage}')
+        if isinstance(voltage, pint.Quantity):
+            voltage = voltage.to(ureg.V).m
+        range_string = f'source:voltage:range {voltage}'
+        self.write_line(range_string)
         actual_range = self.voltage_range
         self._voltage_range = actual_range
 
@@ -155,9 +163,20 @@ class Keithley2400(SCPIDevice):
     @current_range.setter
     @ureg.wraps(None, (None, ureg.A), False)
     def current_range(self, current):
-        self.write_line('source:current:range {current}')
+        if isinstance(current, pint.Quantity):
+            current = current.to(ureg.A).m
+        range_string = f'source:current:range {current}'
+        self.write_line(range_string)
         actual_range = self.current_range
-        self._voltage_range = actual_range
+        self._current_range = actual_range
+
+    @property
+    def at_compliance_limit(self):
+        if self._mode == 'current':
+            compliance_tripped = bool(float(self.query('sense:voltage:protection:tripped?')))
+        elif self._mode == 'voltage':
+            compliance_tripped = bool(float(self.query('sense:current:protection:tripped?')))
+        return compliance_tripped
 
     def measure(self, measure_mode=None):
         """
