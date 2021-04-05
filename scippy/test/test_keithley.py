@@ -49,6 +49,7 @@ def test_identify(keithley, timeout):
 @pytest.mark.keithley
 def test_reset(keithley, timeout):
     keithley['device'].reset()
+    time.sleep(0.1)
     desired_voltage = 0*ureg.V
     desired_current = 0*ureg.uA
     desired_voltage_compliance = 21*ureg.V
@@ -167,7 +168,7 @@ def test_measure_current(keithley, timeout):
     desired_voltage = 21 * ureg.V
     keithley['device'].voltage_compliance = desired_voltage
     keithley['device'].current = 10*ureg.mA
-    actual_voltage, actual_current = keithley['device'].measure()
+    actual_voltage, actual_current = keithley['device'].measure('current')
     assert_equal_qt(actual_voltage, desired_voltage)
     assert abs(actual_current) < 0.01*ureg.mA
 
@@ -175,4 +176,44 @@ def test_measure_current(keithley, timeout):
 def test_measure_warning(keithley, timeout):
     with pytest.warns(UserWarning):
         keithley['device'].current = 0.01
-        voltage, current = keithley['device'].measure()
+        voltage, current = keithley['device'].measure('current')
+
+@pytest.mark.keithley
+def test_voltage_range(keithley, timeout):
+    keithley['device'].mode = 'voltage'
+    keithley['device'].voltage_range = 2*ureg.V
+    desired_range = 2.1* ureg.V
+    actual_range = keithley['device'].voltage_range
+    assert_equal_qt(actual_range, desired_range)
+
+@pytest.mark.keithley
+def test_voltage_range_auto(keithley, timeout):
+    """
+    Check that the voltage range increases when trying to set a voltage higher than we are currently able.
+    """
+    keithley['device'].mode = 'voltage'
+    desired_range = 210* ureg.V
+    keithley['device'].voltage = 22*ureg.V
+    actual_range = keithley['device'].voltage_range
+    assert_equal_qt(actual_range, desired_range)
+
+@pytest.mark.keithley
+def test_current_range(keithley, timeout):
+    keithley['device'].mode = 'current'
+    keithley['device'].current = 1*ureg.uA
+    keithley['device'].current_range = 1*ureg.uA
+    desired_range = 1.0499999999999998*ureg.uA
+    actual_range = keithley['device'].current_range
+    breakpoint()
+    assert_equal_qt(actual_range, desired_range)
+
+@pytest.mark.keithley
+def test_current_range_auto(keithley, timeout):
+    """
+    Check that the voltage range increases when trying to set a voltage higher than we are currently able.
+    """
+    keithley['device'].mode = 'current'
+    desired_range = 10.5* ureg.uA
+    keithley['device'].current = 2*ureg.uA
+    actual_range = keithley['device'].current_range
+    assert_equal_qt(actual_range, desired_range)

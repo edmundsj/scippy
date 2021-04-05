@@ -32,10 +32,14 @@ class Keithley2400(SCPIDevice):
         self._voltage_compliance = 21*ureg.V
         self._voltage = 0*ureg.V
         self._current = 0*ureg.mA
+        self._current_range = 0*ureg.A
+        self._voltage_range = 0*ureg.V
 
         self.mode = self._mode
         self.current_compliance = self._current_compliance
         self.voltage_compliance = self._voltage_compliance
+        self.voltage_range = 21*ureg.V
+        self.current_range = 1.05*ureg.uA
         self.voltage = self._voltage
         self.current = self._current
 
@@ -51,6 +55,8 @@ class Keithley2400(SCPIDevice):
         self._voltage = voltage
         if self._mode == 'current':
             self.mode = 'voltage'
+#if voltage > self._voltage_range:
+#self.voltage_range = voltage
         self.write_line(f'source:voltage:level {voltage}')
 
     @property
@@ -65,6 +71,8 @@ class Keithley2400(SCPIDevice):
         self._current = current
         if self._mode == 'voltage':
             self.mode = 'current'
+#if current > self._current_range:
+#self.current_range = current
         self.write_line(f'source:current:level {current}')
 
     @property
@@ -124,6 +132,32 @@ class Keithley2400(SCPIDevice):
     def voltage_compliance(self, compliance):
         self._voltage_compliance = compliance
         self.write_line(f'sense:voltage:protection:level {compliance}')
+
+    @property
+    @ureg.wraps(ureg.V, None, False)
+    def voltage_range(self):
+        voltage_range = float(self.query('source:voltage:range?'))
+        return voltage_range
+
+    @voltage_range.setter
+    @ureg.wraps(None, (None, ureg.V), False)
+    def voltage_range(self, voltage):
+        self.write_line('source:voltage:range {voltage}')
+        actual_range = self.voltage_range
+        self._voltage_range = actual_range
+
+    @property
+    @ureg.wraps(ureg.A, None, False)
+    def current_range(self):
+        current_range = float(self.query('source:current:range?'))
+        return current_range
+
+    @current_range.setter
+    @ureg.wraps(None, (None, ureg.A), False)
+    def current_range(self, current):
+        self.write_line('source:current:range {current}')
+        actual_range = self.current_range
+        self._voltage_range = actual_range
 
     def measure(self, measure_mode=None):
         """
