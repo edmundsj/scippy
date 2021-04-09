@@ -83,9 +83,11 @@ class SCPIDevice:
         for i, rname in enumerate(resource_list):
             try:
                 print(f'Attempting connection to {rname}...')
-                if re.search('ASRL\d+::', rname) is not None:
+                if re.search(r'ASRL\d+::', rname) is not None:
                     self.is_generic = True
-                if re.search('GPIB\d+::', rname) is not None:
+                if re.search(r'USB\d+::', rname) is not None:
+                    self.is_usb = True
+                if re.search(r'GPIB\d+::', rname) is not None:
                     self.is_gpib = True
 
                 if self.is_generic:
@@ -93,8 +95,15 @@ class SCPIDevice:
                             rname, baud_rate=baud_rate,
                             read_termination=read_termination,
                             write_termination=write_termination)
+                elif self.is_usb:
+                    self.device = rm.open_resource(
+                            rname,
+                            read_termination=read_termination,
+                            write_termination=write_termination)
                 elif self.is_gpib:
                     self.device = rm.open_resource(rname)
+                else:
+                    raise ValueError(f'Device type for rname {rname} not recognized.')
 
                 self._read_termination = read_termination
                 self._write_termination = write_termination
