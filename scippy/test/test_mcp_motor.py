@@ -78,9 +78,9 @@ def testMotorAbortRotation(mcp):
     motorRotation = 200
     mcp['device'].rotate_motor(motorRotation)
     mcp['device'].motor_enable = False
-    time.sleep(0.05)
     motor_rotating_actual = mcp['device'].motor_rotating # check that the motor is no longer rotating
     assert_equal(motor_rotating_actual, False)
+    mcp['device'].rotate_motor(-1*motorRotation) # Put back in original position
 
 @pytest.mark.mcp
 def testMotorSpeedDefault(mcp):
@@ -124,3 +124,21 @@ def testMotorEnableDisable(mcp):
     mcp['device'].motor_enable = motor_enable_desired
     motor_enable_actual = mcp['device'].motor_enable
     assert_equal(motor_enable_actual, motor_enable_desired)
+
+@pytest.mark.mcp
+def test_motor_wavelength_steps(mcp):
+    mcp['device'].motor_enable = True
+    motor_position_initial = mcp['device'].motor_position
+    mcp['device'].wavelength = mcp['device'].wavelength + 5
+
+    motor_position_final = mcp['device'].motor_position
+    actual_delta_position = motor_position_final - motor_position_initial
+    desired_delta_position = 153
+    assert_equal(actual_delta_position, desired_delta_position)
+
+    mcp['device'].wavelength = mcp['device'].wavelength - 5
+    motor_position_final = mcp['device'].motor_position
+    actual_delta_position = motor_position_final - motor_position_initial
+    desired_delta_position = 0
+    assert_equal(actual_delta_position, desired_delta_position)
+

@@ -2,7 +2,8 @@
 
 """
 import pyvisa
-from scippy import SCPIDevice, twos_to_voltage, twos_to_integer, MotorController
+from sciparse import to_standard_quantity, quantity_to_title
+from scippy import SCPIDevice, twos_to_voltage, twos_to_integer, MotorController, ureg
 import os
 import numpy as np
 import pandas as pd
@@ -109,7 +110,7 @@ class MCP3561(SCPIDevice, MotorController):
         measuredData = np.frombuffer(measuredData[1:], dtype=np.uint8) # Discard the leading # and the newline at the end
         return measuredData
 
-    def generate_data(self, sync=True):
+    def generate_data(self, sync=True, gain=None):
         """
         Generates time-series voltage data with or without synchronization points
 
@@ -118,6 +119,7 @@ class MCP3561(SCPIDevice, MotorController):
         :returns: data - a pandas data frame with voltages, times, and (optional) sync points
         """
         voltages = twos_to_voltage(self.measure()) - self.offset_voltage
+        voltages = (voltages * ureg.V).to(ureg.mV)
         times = np.linspace(0, self.n_samples / self.sampling_frequency,
                           self.n_samples)
         pi_phase_indices = twos_to_integer(self.sync_data())
@@ -125,10 +127,37 @@ class MCP3561(SCPIDevice, MotorController):
         sync_column = np.zeros(self.n_samples, dtype=np.int)
         sync_column[pi_phase_indices] = 1 # Sync event
 
-        data = pd.DataFrame(data={
-            'Time (s)': times,
-            'Voltage (mV)': voltages*1e3,
-            'Sync': sync_column})
+        if gain is None:
+            data = pd.DataFrame(data={
+                'Time (s)': times,
+                'Voltage (mV)': voltages.m
+                })
+        else:
+            if to_standard_quantity(gain).units == ureg.ohm:
+                new_data = to_standard_quantity(voltages / gain).to(ureg.nA)
+            elif to_standard_quantity(gain).dimensionless == True:
+                new_data = voltages.m
+
+            title = quantity_to_title(new_data)
+            data = pd.DataFrame(data={
+                'Time (s)': times,
+                title: new_data,
+                })
+
+        if sync == True:
+            data['Sync'] = sync_column
 
         return data
 
+    @property
+    def wavelength(self):
+        return self._wavelength
+
+    @wavelength.setter
+    def wavelength(self, target_wavelength):
+        delta_wavelength = target_wavelength - self._wavelength
+        number_microsteps = \
+            int(delta_wavelength * self._microsteps_per_nm* \
+            (1 + self._microsteps_correction * delta_wavelength))
+        self.rotate_motor(number_microsteps)
+        self._wavelength += delta_wavelength

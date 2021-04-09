@@ -48,6 +48,9 @@ class SCPIDevice:
         usb_serial_indices = np.where(is_usb_serial)[0]
         usb_indices = np.append(usb_modem_indices, usb_serial_indices)
 
+        if len(usb_indices) == 0:
+            raise ValueError(f'No Serial device found. Make sure it is plugged in. Available devices are {port_names}')
+
         for index in usb_indices:
             self.read_termination = read_termination
             self.write_termination = write_termination
