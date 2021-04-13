@@ -3,6 +3,7 @@
 """
 from scippy import SCPIDevice, ureg
 import numpy as np
+import warnings
 import pint
 
 class Agilent33210A(SCPIDevice):
@@ -57,11 +58,13 @@ class Agilent33210A(SCPIDevice):
     @amplitude.setter
     @ureg.wraps(None, (None, ureg.V), strict=False)
     def amplitude(self, amplitude):
-        if amplitude < 0.01:
-            amplitude = 0.01
-            self._amplitude = amplitude
+        if amplitude < 0.01 and amplitude != 0:
+            self._amplitude = self.MIN_AMPLITUDE
             self.write_line('VOLTAGE ' + str(amplitude) + 'V')
-            raise UserWarning(f'Attempted to set amplitude to {amplitude}. Lowest possible amplitude for this device is {self.MIN_AMPLITUDE}. Setting amplitude to {self.MIN_AMPLITUDE}')
+            warnings.warn(f'Attempted to set amplitude to {amplitude}. Lowest possible amplitude for this device is {self.MIN_AMPLITUDE}. Setting amplitude to {self.MIN_AMPLITUDE}')
+        elif amplitude == 0:
+            self.output_on = False
+            amplitude = 0.01
 
         if isinstance(amplitude, pint.Quantity):
             self._amplitude = amplitude

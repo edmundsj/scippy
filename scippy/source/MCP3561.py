@@ -43,7 +43,7 @@ class MCP3561(SCPIDevice, MotorController):
                 data = json.load(settingsFile)
                 self._wavelength = data['wavelength']
         else:
-             self._wavelength = 1000
+             self._wavelength = 850
 
     @property
     def n_samples(self):

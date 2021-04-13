@@ -59,12 +59,24 @@ def test_set_amplitude(agilent):
 def test_set_amplitude_limit(agilent):
     desired_voltage = 9*ureg.mV # Smaller than we can handle
     minimum_amplitude = 0.01*ureg.V
-    with pytest.raises(UserWarning):
+    with pytest.warns(UserWarning):
         agilent['device'].amplitude = desired_voltage
 
     actual_amplitude = agilent['device'].amplitude
     desired_amplitude = minimum_amplitude
     assert actual_amplitude == desired_amplitude
+
+@pytest.mark.agilent
+def test_set_amplitude_zero_nounits(agilent):
+    agilent['device'].amplitude = 0
+
+    actual_amplitude = agilent['device'].amplitude
+    desired_amplitude = 10*ureg.mV
+    actual_state = agilent['device'].output_on
+    desired_state = False
+    assert actual_amplitude == desired_amplitude
+    assert actual_state == desired_state
+
 
 def test_set_amplitude_units(agilent):
     desired_voltage = 50*ureg.mV

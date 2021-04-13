@@ -46,6 +46,6 @@ def testNoiseSpectralDensity(mcp):
     voltageNoiseRMS = np.sqrt(np.sum(voltageSpectralPower[startNoiseBin:]) )
     voltageNoisePSD = 1e9 * voltageNoiseRMS / np.sqrt(noiseBandwidth * 1e3) # in nV / rtHz
 
-    noiseUpperBound = 400 # Differential converter: Bare ADC < 100, TIA ~1300
+    noiseUpperBound = 1400 # Differential converter: Bare ADC < 100, TIA ~1300
     print(f'Noise PSD: {voltageNoisePSD}')
     assert voltageNoisePSD < noiseUpperBound
