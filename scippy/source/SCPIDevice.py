@@ -56,7 +56,7 @@ class SCPIDevice:
             self.write_termination = write_termination
             self.device = serial.Serial(port_names[index])
             self.device.timeout = 0.05
-            self.device.baud_rate = baud_rate
+            self.device.baudrate = baud_rate
             actual_name = self.identify()
             if device_name == '':
                 break

@@ -12,7 +12,7 @@ import json
 class MCP3561(SCPIDevice, MotorController):
     def __init__(self, lib_type='pyserial',
             device_name='MCP3561 Dev Board v1', read_termination='\r\n', write_termination='\n', sampling_frequency=9765.65,
-            n_samples=1, offset_voltage=1.198):
+            n_samples=1, offset_voltage=3.12512):
         """
         Implementation of communication device for the MCP3561 ADC and an accompanying development board.
 
@@ -150,10 +150,12 @@ class MCP3561(SCPIDevice, MotorController):
         return data
 
     @property
+    @ureg.wraps(ureg.nm, None, strict=False)
     def wavelength(self):
         return self._wavelength
 
     @wavelength.setter
+    @ureg.wraps(None, (None, ureg.nm), strict=False)
     def wavelength(self, target_wavelength):
         delta_wavelength = target_wavelength - self._wavelength
         number_microsteps = \
@@ -161,3 +163,4 @@ class MCP3561(SCPIDevice, MotorController):
             (1 + self._microsteps_correction * delta_wavelength))
         self.rotate_motor(number_microsteps)
         self._wavelength += delta_wavelength
+

@@ -65,6 +65,13 @@ class Agilent33210A(SCPIDevice):
         elif amplitude == 0:
             self.output_on = False
             amplitude = 0.01
+        elif amplitude >= 0.01 and amplitude < 1: # round to mV
+            amplitude = round((amplitude * 1000)) / 1000
+        elif amplitude >= 1 and amplitude < 10: # round to 10mV
+            amplitude = round((amplitude * 100)) / 100
+        elif amplitude > 10:
+            warnings.warn(f'Attempted to set amplitude to {amplitude}. Highest possible amplitude for this device is {self.MAX_AMPLITUDE}. Setting amplitude to {self.MAX_AMPLITUDE}')
+            amplitude = 10
 
         if isinstance(amplitude, pint.Quantity):
             self._amplitude = amplitude

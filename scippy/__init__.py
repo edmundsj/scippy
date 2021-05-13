@@ -7,3 +7,4 @@ from scippy.source.Agilent33210A import Agilent33210A as Agilent
 from scippy.source.Keithley2400 import Keithley2400 as Keithley
 from scippy.source.twos_postprocessing import *
 from scippy.source.MCP3561 import MCP3561 as MCP
+from scippy.source.TEController import TEController as TEC
