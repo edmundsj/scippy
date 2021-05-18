@@ -47,22 +47,22 @@ def test_set_remote_control(tec):
 @pytest.mark.tec
 def test_set_mode_voltage(tec):
     desired_mode = 'voltage'
-    tec.control_mode = desired_mode
-    actual_mode = tec.control_mode
+    tec.mode = desired_mode
+    actual_mode = tec.mode
     assert_equal(actual_mode, desired_mode)
 
 @pytest.mark.tec
 def test_set_mode_current(tec):
     desired_mode = 'current'
-    tec.control_mode = desired_mode
-    actual_mode = tec.control_mode
+    tec.mode = desired_mode
+    actual_mode = tec.mode
     assert_equal(actual_mode, desired_mode)
 
 @pytest.mark.tec
 def test_set_mode_temperature(tec):
     desired_mode = 'temperature'
-    tec.control_mode = desired_mode
-    actual_mode = tec.control_mode
+    tec.mode = desired_mode
+    actual_mode = tec.mode
     assert_equal(actual_mode, desired_mode)
 
 @pytest.mark.tec
@@ -107,3 +107,10 @@ def test_measure_temperature(tec):
     assert actual_temperature < desired_temperature_range[1] and \
         actual_temperature > desired_temperature_range[0]
 
+@pytest.mark.tec
+def test_check_drive_voltage(tec):
+    desired_voltage = 0.0
+    tec.voltage_setpoint = desired_voltage
+    breakpoint()
+    actual_voltage = tec.voltage
+    assert_equal(actual_voltage, desired_voltage)

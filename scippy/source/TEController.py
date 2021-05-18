@@ -28,25 +28,25 @@ class TEController(SCPIDevice):
                 read_termination=read_termination,
                 write_termination=write_termination,
                 baud_rate=baud_rate)
-        self._control_mode = 'temperature'
+        self._mode = 'temperature'
         self._remote = False
         time.sleep(2) # Wait for Arduino initialization
 
     @property
-    def control_mode(self):
+    def mode(self):
         """
         Control mode of the device. Can be in one of three modes: "voltage", "current", and "temperature".
         """
         mode = self.query('MODE?')
         return mode
 
-    @control_mode.setter
-    def control_mode(self, mode):
-        if self._control_mode != mode:
+    @mode.setter
+    def mode(self, mode):
+        if self._mode != mode:
             if mode not in ['voltage', 'current', 'temp', 'temperature']:
                 raise ValueError(f'mode {mode} is not valid. Available modes are "voltage", "current", and "temperature"')
             self.write_line('MODE ' + mode)
-            self._control_mode = mode
+            self._mode = mode
 
     @property
     def voltage_setpoint(self):
@@ -58,6 +58,8 @@ class TEController(SCPIDevice):
 
     @voltage_setpoint.setter
     def voltage_setpoint(self, voltage):
+        self.remote = True
+        self.mode = 'voltage'
         if voltage > 255:
             warnings.warn('Attempted to set voltage to {voltage}. Min value is -255. Setting to the min value of -255.')
             voltage  = 255
@@ -69,7 +71,7 @@ class TEController(SCPIDevice):
 
     @property
     def voltage(self):
-        data = int(self.query('VOLTAGE?'))
+        data = float(self.query('VOLTAGE?'))
         self._voltage = data
         return data
 
@@ -82,6 +84,8 @@ class TEController(SCPIDevice):
     @current_setpoint.setter
     @ureg.wraps(None, (None, ureg.A), strict=False)
     def current_setpoint(self, current):
+        self.remote = True
+        self.mode = 'current'
         self.write_line('SOURCE:CURRENT {:.2f}'.format(current))
         self._current_setpoint = current
 
@@ -99,6 +103,8 @@ class TEController(SCPIDevice):
 
     @temperature_setpoint.setter
     def temperature_setpoint(self, temp):
+        self.remote = True
+        self.mode = 'temperature'
         self.write_line('SOURCE:TEMPERATURE {:.1f}'.format(temp))
         self._temperature = temp
 
