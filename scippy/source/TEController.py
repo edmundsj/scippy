@@ -42,11 +42,9 @@ class TEController(SCPIDevice):
 
     @mode.setter
     def mode(self, mode):
-        if self._mode != mode:
-            if mode not in ['voltage', 'current', 'temp', 'temperature']:
-                raise ValueError(f'mode {mode} is not valid. Available modes are "voltage", "current", and "temperature"')
-            self.write_line('MODE ' + mode)
-            self._mode = mode
+        if mode not in ['voltage', 'current', 'temp', 'temperature']:
+            raise ValueError(f'mode {mode} is not valid. Available modes are "voltage", "current", and "temperature"')
+        self.write_line('MODE ' + mode)
 
     @property
     def voltage_setpoint(self):
@@ -133,3 +131,17 @@ class TEController(SCPIDevice):
             rem_str = '0'
         self.write_line('REMOTE ' + rem_str)
         self._remote = rem
+
+    def measure_temperature(self):
+        return float(self.query('MEASURE:TEMPERATURE?'))
+
+    def measure_current(self):
+        return float(self.query('MEASURE:CURRENT?'))
+
+    @property
+    def ready(self):
+        rdy = self.query('READY?')
+        if rdy == '1':
+            return True
+        else:
+            return False
